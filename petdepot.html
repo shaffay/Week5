@@ -20,7 +20,7 @@
     <h2 v-text="product.title"></h2>
     <p v-html="product.description"></p>
      <p> Price: {{product.price}}</p>
-   
+   <input type="button" value="add" v-on:click="addToCart" >
 
 </div>
     <script type="text/javascript">
@@ -37,7 +37,15 @@
                 image: "images/Arena.jpeg"
             },
             cart: []
-        }
+            
+
+        },
+        methods: {
+          addToCart: function (){
+            this.cart.push(this.product.id);
+            
+          }
+        },
     });
 
     </script>
