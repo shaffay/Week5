@@ -7,21 +7,140 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
     <!-- Bootstrap CSS -->
+  <script src="products.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   </head>
   <body>
     <div id="app">
     <h1 class="display-3" v-text="sitename"></h1>
+    <button v-on:click="showCheckout">
+      {{ cartItemCount }}
+      <span class="fa-solid fa-cart-plus"></span>
+      Checkout
+    </button>
     <main>
-        <figure>
-            <img v-bind:src="product.image">
-        </figure>
-    </main>
-    <h2 v-text="product.title"></h2>
-    <p v-html="product.description"></p>
-     <p> Price: {{product.price}}</p>
-   <input type="button" value="add" v-on:click="addToCart" >
+      <div v-if="showProduct">
+        <div v-for="product in product">
 
+
+
+       
+          <figure>
+          <img v-bind:src="product.image">
+          </figure>
+          
+          <h2 v-text="product.title"></h2>
+          <p v-html="product.description"></p>
+          <p> Price: {{product.price}}</p>
+          <p>Availble Stock : {{product.availableInventory}}</p>
+
+          <input type="button" value="addToCart" v-on:click="addToCart" v-if="canAddToCart" >    
+  
+
+        <button disabled="disabled" v-else value="AddToCart" ></button>
+ 
+         <span v-if="product.availableInventory === cartItemCount">
+        All out!
+         </span>
+            <span v-else-if="product.availableInventory - cartItemCount < 5">
+              Only {{product.availableInventory - cartItemCount}} left!
+
+            </span>
+            <span v-else>
+        Buy Now
+            </span>
+            <div>
+              <span v-for="n  in product.rating"><i class="fas fa-star"></i></span>
+              <span v-for="n in 5-product.rating"><i class="far fa-star"></i></span>
+    </div>
+      </div>
+      </div>
+    <div v-else>
+      <div class="container">
+
+    
+      <h2>Checkout</h2>
+
+      <div class="row"> 
+        <div class="col col-lg-6">
+          <div class="form-group">
+            <label for="">First Name</label>
+            <input v-model.tirm="order.firstName" >    
+          </div>
+    
+          <div class="form-group">
+            <label for="">Last Name</label>
+            <input v-model.tirm="order.lastName" >    
+          </div>
+    
+          <div class="form-group">
+            <label for="">Address</label>
+            <input v-model="order.address" >    
+          </div>
+        </div>
+        <div class="col col-lg-6">
+          <div class="form-group">
+            <label for="">City</label>
+            <input v-model="order.city" >    
+          </div>
+    
+          <div class="form-group">
+    
+            <select v-model="order.state">
+              <option disabled value="">State</option>
+              <option v-for="(state, key) in states" 
+                v-bind:value="state">
+                {{ key }}
+
+              </option>
+
+              </option>
+         
+            </select>
+            <div class="form-group">
+              <label for="">Zip/Postal Code</label>
+              <input v-model-number="order.zip" type="number" >    
+            </div>
+            <p>
+              <input type="checkbox" id="gift" value="true" v-model="order.gift"
+              v-bind:true-value="order.sendGift"
+              v-bind:false-value="order.dontSendGift"
+              >
+               <label for="gift">Ship As Gift</label>
+            </p>
+            <p>
+              <input type="radio" id="home" value="Home" v-model="order.method">
+              <label for="home">Home</label>
+            </p>
+            <p>
+              <input type="radio" id="buisness" value="Buisness" v-model="order.method">
+              <label for="buisness">Buisness</label>
+            </p>
+       </div>
+      </div>
+    
+
+     
+  
+          
+      </div>
+      
+   
+      <h2>Order Information</h2>
+
+      <p>First Name: {{order.firstName}}</p>
+      <p>Last Name: {{order.lastName}}</p>
+      <p>Address: {{order.address}}</p>
+      <p>City: {{order.city}}</p>
+      <p>State: {{order.state}}</p>
+      <p>Zip: {{order.zip}}</p>
+      <p>Method: {{order.method}}</p>
+      <p>Gift: {{order.gift}}</p>
+      <button v-on:click="submitForm">Place Order</button>
+    </div>
+      </div>
+    </main>
 </div>
     <script type="text/javascript">
     
@@ -29,21 +148,59 @@
         el: '#app',
         data: {
             sitename:'Vue.js Pet Depot',
-            product:{
-                id:1001,
-                title:"Cat Food , 25lb Bag",
-                description:"lorem lorem lorem <em>lorem</em> lorem lorem lorem",
-                price: 2000,
-                image: "images/Arena.jpeg"
+           product:products,
+           //   {
+            //     id:1001,
+            //     title:"Cat Food , 25lb Bag",
+            //     description:"lorem lorem lorem <em>lorem</em> lorem lorem lorem",
+            //     price: 2000,
+            //     image: "images/Arena.jpeg",
+            //     availableInventory:10,
+            //     rating:2
+                
+            // },
+            showProduct:true,
+            cart: [],
+            order: {
+              firstName:'',
+              lastName:'',
+              address:'',
+              city:'',
+              state:'',
+              zip:'',
+              sendGift: 'Send as a Gift',
+              dontSendGift: 'Do not send as a Gift',
+              method:'Home',
+
+
             },
-            cart: []
-            
+            states:{
+              Al:'Alanta',
+              AR:'Arizona',
+              CA:'Califonia',
+              NV:'Nivada'
+            }
 
         },
         methods: {
           addToCart: function (){
             this.cart.push(this.product.id);
+            //this.product.availableInventory--;
             
+          },
+          showCheckout() {
+            this.showProduct =this.showProduct ? false : true
+          },
+          submitForm() {
+            alert('{Youre Order Submitted!')
+          }
+        },
+        computed:{
+          cartItemCount: function() {
+            return this.cart.length|| '';
+          },
+          canAddToCart: function () {
+              return this.product.availableInventory > 0
           }
         },
     });
